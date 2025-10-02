@@ -74,4 +74,12 @@ def levenshtein(a: str, b: str) -> int:
     return prev[-1]
 # --- endsnippet ---
 
+# --- snippet: count_words ---
+def count_words(s: str) -> int:
+    """
+    Counts words separated by whitespace.
+    """
+    return len(s.split())
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
