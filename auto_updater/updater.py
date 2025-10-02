@@ -5,7 +5,7 @@ import re
 import subprocess
 from datetime import datetime
 
-# Добавляем корень проекта в sys.path, чтобы импорт работал
+# Добавляем корень проекта в sys.path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from auto_updater.notify import notify
@@ -13,19 +13,17 @@ from auto_updater.notify import notify
 # Пути
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SNIPPETS_DIR = os.path.join(ROOT, "data", "snippets_code")
-TARGET_DIRS = [
-    os.path.join(ROOT, "notecli"),
-]
+TARGET_DIRS = [os.path.join(ROOT, "notecli")]
 
 # Настройки вероятностей
 PROB_ADD = 0.6      # вероятность добавить сниппет
-PROB_DELETE = 0.2   # вероятность удалить существующий сниппет
+PROB_DELETE = 0.2   # вероятность удалить сниппет
 
 SNIPPET_HEADER = re.compile(r"# --- snippet: (.+?) ---")
 SNIPPET_END = re.compile(r"# --- endsnippet ---")
 
 def load_all_snippets():
-    snippets = {}  # name -> code (multiline)
+    snippets = {}
     for fname in os.listdir(SNIPPETS_DIR):
         path = os.path.join(SNIPPETS_DIR, fname)
         if not os.path.isfile(path):
@@ -97,6 +95,7 @@ def choose_action_and_apply(snippets, targets):
     before, zone, after = parsed
     inserted = get_inserted_snippets(zone)
 
+    # Удаление
     do_delete = random.random() < PROB_DELETE and inserted
     if do_delete:
         name = random.choice(list(inserted.keys()))
@@ -104,6 +103,7 @@ def choose_action_and_apply(snippets, targets):
         write_zone_to_file(target, before, new_zone, after)
         return f"Deleted snippet '{name}' from {os.path.relpath(target, ROOT)}"
 
+    # Добавление / замена
     do_add = random.random() < PROB_ADD
     if do_add:
         name, code = random.choice(list(snippets.items()))
@@ -115,15 +115,29 @@ def choose_action_and_apply(snippets, targets):
             action = "Added"
         write_zone_to_file(target, before, new_zone, after)
         return f"{action} snippet '{name}' into {os.path.relpath(target, ROOT)}"
-    else:
-        new_zone = zone + f"\n# autosave {datetime.utcnow().isoformat()}\n"
-        write_zone_to_file(target, before, new_zone, after)
-        return f"Touched zone in {os.path.relpath(target, ROOT)} (no snippet change)"
+
+    # Пустая правка
+    new_zone = zone + f"\n# autosave {datetime.utcnow().isoformat()}\n"
+    write_zone_to_file(target, before, new_zone, after)
+    return f"Touched zone in {os.path.relpath(target, ROOT)} (no snippet change)"
+
+def check_syntax():
+    """Проверяем, что весь проект компилируется"""
+    try:
+        subprocess.run(["python3", "-m", "py_compile"] + 
+                       [os.path.join(r, f) 
+                        for r, d, files in os.walk(ROOT) 
+                        for f in files if f.endswith(".py")],
+                       check=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 def git_commit_and_push(message: str):
     try:
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(["git", "commit", "-m", message], check=True)
+        subprocess.run(["git", "pull", "--rebase"], check=True)
         subprocess.run(["git", "push"], check=True)
         return True, None
     except subprocess.CalledProcessError as e:
@@ -136,6 +150,11 @@ def main():
         return
     targets = find_target_files()
     msg = choose_action_and_apply(snippets, targets)
+
+    if not check_syntax():
+        notify(f"Syntax error after change: {msg}. Commit aborted.")
+        return
+
     success, err = git_commit_and_push(msg)
     if success:
         notify(f"Committed: {msg}")
