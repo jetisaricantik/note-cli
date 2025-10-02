@@ -8,7 +8,7 @@ def run_updater():
     subprocess.run(["python3", "auto_updater/updater.py"])
 
 def main():
-    # Определяем, сколько запусков будет сегодня
+    # Определяем, сколько запусков будет сегодня (0, 1 или 2)
     runs = random.choices([0, 1, 2], weights=[1, 3, 2])[0]
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Planned {runs} run(s) for today")
 
@@ -19,7 +19,7 @@ def main():
     start_sec = 9 * 3600
     end_sec = 22 * 3600
 
-    # Выбираем случайные времена (в секундах от начала дня)
+    # Выбираем случайные моменты в пределах диапазона
     run_times = sorted(random.sample(range(start_sec, end_sec), runs))
 
     for t in run_times:
