@@ -51,4 +51,27 @@ def unique_words_sorted(text: str) -> list:
 
 # autosave 2025-10-02T09:08:01.613227
 
+# --- snippet: levenshtein_distance ---
+def levenshtein(a: str, b: str) -> int:
+    """
+    Compute Levenshtein distance between two strings (iterative DP).
+    """
+    if a == b:
+        return 0
+    if len(a) == 0:
+        return len(b)
+    if len(b) == 0:
+        return len(a)
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, start=1):
+        cur = [i] + [0] * len(b)
+        for j, cb in enumerate(b, start=1):
+            add = prev[j] + 1
+            delete = cur[j-1] + 1
+            change = prev[j-1] + (0 if ca == cb else 1)
+            cur[j] = min(add, delete, change)
+        prev = cur
+    return prev[-1]
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
