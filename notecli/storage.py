@@ -26,3 +26,6 @@ def read_note(filename: str):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
+# AUTO_SNIPPETS_ZONE_START
+# Здесь авто-апдейтер может вставлять функции из snippets.
+# AUTO_SNIPPETS_ZONE_END
