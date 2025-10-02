@@ -116,7 +116,7 @@ def choose_action_and_apply(snippets, targets):
         write_zone_to_file(target, before, new_zone, after)
         return f"{action} snippet '{name}' into {os.path.relpath(target, ROOT)}"
 
-    # Пустая правка
+    # Пустая правка (для активности)
     new_zone = zone + f"\n# autosave {datetime.utcnow().isoformat()}\n"
     write_zone_to_file(target, before, new_zone, after)
     return f"Touched zone in {os.path.relpath(target, ROOT)} (no snippet change)"
@@ -124,11 +124,8 @@ def choose_action_and_apply(snippets, targets):
 def check_syntax():
     """Проверяем, что весь проект компилируется"""
     try:
-        subprocess.run(["python3", "-m", "py_compile"] + 
-                       [os.path.join(r, f) 
-                        for r, d, files in os.walk(ROOT) 
-                        for f in files if f.endswith(".py")],
-                       check=True)
+        py_files = [os.path.join(r, f) for r, d, files in os.walk(ROOT) for f in files if f.endswith(".py")]
+        subprocess.run(["python3", "-m", "py_compile"] + py_files, check=True)
         return True
     except subprocess.CalledProcessError:
         return False
@@ -136,7 +133,11 @@ def check_syntax():
 def git_commit_and_push(message: str):
     try:
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", message], check=True)
+        # если нет изменений, commit вернёт код != 0
+        result = subprocess.run(["git", "commit", "-m", message])
+        if result.returncode != 0:
+            return False, "No changes to commit"
+        # всегда тянем свежак с GitHub
         subprocess.run(["git", "pull", "--rebase"], check=True)
         subprocess.run(["git", "push"], check=True)
         return True, None
