@@ -28,4 +28,13 @@ def read_note(filename: str):
 
 # AUTO_SNIPPETS_ZONE_START
 # Здесь авто-апдейтер может вставлять функции из snippets.
+
+# --- snippet: reverse_text ---
+def reverse_text(s: str) -> str:
+    """
+    Reverses text.
+    """
+    return s[::-1]
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
