@@ -82,4 +82,12 @@ def count_words(s: str) -> int:
     return len(s.split())
 # --- endsnippet ---
 
+# --- snippet: to_title_case ---
+def to_title_case(s: str) -> str:
+    """
+    Make each word start with uppercase.
+    """
+    return " ".join(w.capitalize() for w in s.split())
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
