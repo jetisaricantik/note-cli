@@ -84,4 +84,17 @@ def to_title_case(s: str) -> str:
 
 # autosave 2025-10-03T11:02:37.613588
 
+# --- snippet: find_anagrams ---
+from collections import defaultdict
+def find_anagrams(words: list[str]) -> dict:
+    """
+    Group words into anagrams.
+    """
+    groups = defaultdict(list)
+    for w in words:
+        key = "".join(sorted(w.lower()))
+        groups[key].append(w)
+    return {k: v for k, v in groups.items() if len(v) > 1}
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
