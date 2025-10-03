@@ -37,14 +37,6 @@ def reverse_text(s: str) -> str:
     return s[::-1]
 # --- endsnippet ---
 
-# --- snippet: unique_words_sorted ---
-def unique_words_sorted(text: str) -> list:
-    """
-    Returns sorted list of unique words.
-    """
-    s = set(w.strip('.,!?()[]') for w in text.split())
-    return sorted(w for w in s if w)
-# --- endsnippet ---
 
 
 # autosave 2025-10-02T09:06:02.257175
