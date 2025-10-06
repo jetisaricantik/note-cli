@@ -97,4 +97,13 @@ def find_anagrams(words: list[str]) -> dict:
     return {k: v for k, v in groups.items() if len(v) > 1}
 # --- endsnippet ---
 
+# --- snippet: unique_words_sorted ---
+def unique_words_sorted(text: str) -> list:
+    """
+    Returns sorted list of unique words.
+    """
+    s = set(w.strip('.,!?()[]') for w in text.split())
+    return sorted(w for w in s if w)
+# --- endsnippet ---
+
 # AUTO_SNIPPETS_ZONE_END
